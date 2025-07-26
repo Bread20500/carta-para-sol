@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carta Animada con Sobre</title>
+    <style>
+   
+
+        /* Estilos generales del cuerpo de la página */
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f0f0f0; /* Fondo gris claro */
+            margin: 0;
+            font-family: 'Inter', Arial, sans-serif; /* Fuente Inter */
+            overflow-y: scroll; /* Activa scroll vertical */
+            border-radius: 8px; /* Bordes redondeados para el cuerpo */
+        }
+
+        /* Contenedor principal del sobre */
+        .envelope-wrapper {
+            position: relative;
+            width: 300px; /* Ancho del sobre */
+            height: 200px; /* Alto del sobre */
+            perspective: 1000px; /* Para efectos 3D al abrir */
+            cursor: pointer; /* Cambia el cursor para indicar interactividad */
+            border-radius: 8px; /* Bordes redondeados */
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* Sombra sutil */
+        }
+
+        /* Estilo base del sobre */
+        .envelope {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-color: #e6e6e6; /* Color base del sobre */
+            border-radius: 8px; /* Bordes redondeados */
+            transform-style: preserve-3d; /* Mantiene los elementos hijos en 3D */
+            transition: transform 0.5s ease; /* Transición suave para la apertura */
+        }
+
+        /* Estilos comunes para las solapas del sobre */
+        .envelope-top-flap,
+        .envelope-left-flap,
+        .envelope-right-flap,
+        .envelope-bottom-flap {
+            position: absolute;
+            background-color: #c9c9c9; /* Color de las solapas (unificado) */
+            transition: transform 0.5s ease, z-index 0.5s ease; /* Transición para movimiento y capa */
+            z-index: 2; /* Asegura que las solapas estén encima del cuerpo del sobre */
+        }
+
+        /* Solapa superior (forma de triángulo) */
+        .envelope-top-flap {
+            width: 0;
+            height: 0;
+            border-left: 150px solid transparent; /* Mitad del ancho del sobre */
+            border-right: 150px solid transparent; /* Mitad del ancho del sobre */
+            border-bottom: 100px solid #c9c9c9; /* Altura de la solapa */
+            top: 0;
+            left: 0;
+            transform-origin: top center; /* Punto de pivote para la rotación */
+            z-index: 3; /* La solapa superior debe estar encima de las laterales */
+            border-radius: 8px 8px 0 0; /* Bordes redondeados solo arriba */
+        }
+
+        /* Solapa izquierda (forma de triángulo que se pliega desde el lado) */
+        .envelope-left-flap {
+            width: 0;
+            height: 0;
+            border-top: 100px solid transparent;
+            border-bottom: 100px solid transparent;
+            border-right: 150px solid #c9c9c9; /* Color unificado, ancho de la solapa */
+            top: 0; /* Se posiciona desde la parte superior del sobre */
+            left: 0; /* Alineado con el borde izquierdo del sobre */
+            z-index: 1; /* Detrás de la solapa superior */
+            transform-origin: right center; /* Pivote para rotar desde el borde derecho de la solapa */
+        }
+
+        /* Solapa derecha (forma de triángulo que se pliega desde el lado) */
+        .envelope-right-flap {
+            width: 0;
+            height: 0;
+            border-top: 100px solid transparent;
+            border-bottom: 100px solid transparent;
+            border-left: 150px solid #c9c9c9; /* Color unificado, ancho de la solapa */
+            top: 0; /* Se posiciona desde la parte superior del sobre */
+            right: 0; /* Alineado con el borde derecho del sobre */
+            z-index: 1; /* Detrás de la solapa superior */
+            transform-origin: left center; /* Pivote para rotar desde el borde izquierdo de la solapa */
+        }
+
+        /* Solapa inferior (rectangular) */
+        .envelope-bottom-flap {
+            width: 100%;
+            height: 100px; /* Altura de la solapa inferior */
+            background-color: #c9c9c9;
+            bottom: 0;
+            left: 0;
+            border-radius: 0 0 8px 8px; /* Bordes redondeados solo abajo */
+            z-index: 1; /* Detrás de la solapa superior */
+        }
+
+        /* Estilo de la carta dentro del sobre */
+        .letter {
+            position: absolute;
+            top: 10px; /* Margen superior */
+            left: 10px; /* Margen izquierdo */
+            width: calc(100% - 20px); /* Ancho ajustado con márgenes */
+            height: auto; /* La altura se ajustará automáticamente al contenido */
+            min-height: calc(100% - 20px); /* Altura mínima para que no sea demasiado pequeña */
+            background-color: #fff; /* Color del papel de la carta */
+            border-radius: 4px; /* Bordes redondeados */
+            padding: 15px; /* Relleno interno */
+            box-sizing: border-box; /* Incluye padding en el ancho/alto */
+            transform: translateY(0); /* Posición inicial */
+            transition: transform 0.8s ease, opacity 0.8s ease; /* Transiciones suaves */
+            opacity: 0; /* Inicialmente oculta */
+            z-index: 0; /* Debajo de las solapas */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Sombra ligera para la carta */
+            display: flex; /* Para centrar el texto dentro de la carta */
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            color: #333; /* Color del texto */
+            font-size: 1.1em;
+            line-height: 1.6;
+        }
+
+        /* Estilos del corazón */
+        .heart {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background-color: #ff6b6b; /* Color rojo del corazón */
+            transform: rotate(-45deg); /* Gira para formar el corazón */
+            top: 50%; /* Centra verticalmente */
+            left: 50%; /* Centra horizontalmente */
+            margin-top: -25px; /* Ajusta la posición para centrar el corazón */
+            margin-left: -25px; /* Ajusta la posición para centrar el corazón */
+            z-index: 5; /* Asegura que el corazón esté encima de todo */
+            transition: transform 0.5s ease, opacity 0.5s ease; /* Transición para la animación */
+        }
+
+        .heart::before,
+        .heart::after {
+            content: '';
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background-color: #ff6b6b; /* Color rojo del corazón */
+            border-radius: 50%; /* Forma circular */
+        }
+
+        .heart::before {
+            top: -25px; /* Posiciona la parte superior izquierda del corazón */
+            left: 0;
+        }
+
+        .heart::after {
+            top: 0;
+            left: 25px; /* Posiciona la parte superior derecha del corazón */
+        }
+
+        /* Estado 'open' (cuando el sobre se abre) */
+        .envelope-wrapper.open .envelope-top-flap {
+            transform: rotateX(180deg); /* La solapa superior rota 180 grados */
+            z-index: 0; /* Se mueve detrás de la carta */
+        }
+
+        .envelope-wrapper.open .letter {
+            transform: translateY(-80px); /* La carta sube */
+            opacity: 1; /* Se hace visible */
+            z-index: 4; /* Va por encima de todo cuando sale */
+        }
+
+        /* Las solapas laterales se abren ligeramente para un efecto 3D */
+        .envelope-wrapper.open .envelope-left-flap {
+            transform: rotateY(-10deg); /* Rotación ligera hacia afuera */
+            background-color: #e0e0e0; /* Cambio de color para simular luz */
+        }
+
+        .envelope-wrapper.open .envelope-right-flap {
+            transform: rotateY(10deg); /* Rotación ligera hacia afuera */
+            background-color: #e0e0e0; /* Cambio de color para simular luz */
+        }
+
+        /* Animación del corazón al abrirse el sobre */
+        .envelope-wrapper.open .heart {
+            transform: rotate(-45deg) scale(0); /* El corazón se encoge y desaparece */
+            opacity: 0; /* Se desvanece */
+        }
+       /* Oscuro */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: #222;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #555;
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #777;
+}
+
+/* Para Firefox */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: #555 #222;
+}
+
+
+    </style>
+</head>
+    
+
+<body>
+    <div class="envelope-wrapper">
+        <div class="envelope">
+            <div class="envelope-top-flap"></div>
+            <div class="envelope-left-flap"></div>
+            <div class="envelope-right-flap"></div>
+            <div class="envelope-bottom-flap"></div>
+            <div class="heart"></div> <!-- El corazón añadido aquí -->
+            <div class="letter">
+                <p>Mi querida Sol</p> 
+                <p>Tú me diste un propocito, y quiero poder cumplirlo, para ti y para nuestros hijos</p>
+                <p>Eres la mujer más bella que existe en toda la galaxia, es más, la mas hermosa de la creación</p>
+                <p>Tu te mereces la vida de una princesa ya que eres y seras mi princesa de rosa :3, te amo.</p>
+                                      <p>♥️</p>
+
+            </div>
+        </div>
+    </div>
+<iframe style="border-radius:12px" 
+        src="https://open.spotify.com/embed/track/6Qyc6fS4DsZjB2mRW9DsQs?utm_source=generator" 
+        width="300" 
+        height="80" 
+        frameborder="0" 
+        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
+        loading="lazy">
+</iframe>
+    <script>
+        // Espera a que el DOM esté completamente cargado
+        document.addEventListener('DOMContentLoaded', () => {
+            // Selecciona el contenedor principal del sobre
+            const envelopeWrapper = document.querySelector('.envelope-wrapper');
+
+            // Añade un event listener para el evento 'click'
+            envelopeWrapper.addEventListener('click', () => {
+                // Alterna la clase 'open' en el contenedor.
+                // Esto activa/desactiva las animaciones CSS definidas para el estado 'open'.
+                envelopeWrapper.classList.toggle('open');
+            });
+        });
+    </script>
+</body>
+</html>
